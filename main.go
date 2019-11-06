@@ -69,6 +69,18 @@ func sendMsg(writer http.ResponseWriter, request *http.Request) {
 func editMsg(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 
+	params := mux.Vars(request)
+	for _, msg := range chat {
+		if msg.Id == params["id"] {
+			_ = json.NewDecoder(request.Body).Decode(&(msg.Content))
+			msg.Content.Content = "(Edited) " + msg.Content.Content
+			fmt.Println("Edited Message:")
+			fmt.Println("#", msg.Id, msg.Content.Author, ":", msg.Content.Content)
+			//chat = append(chat[:index], chat[index+1:]...)
+			json.NewEncoder(writer).Encode(chat)
+			return
+		}
+	}
 }
 func deleteMsg(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
@@ -110,6 +122,4 @@ func main() {
 
 	last := Message{"-1", Text{"The chat room is closed.", "SERVER"}}
 	chat = append(chat, last)
-
-	return
 }
